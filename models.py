@@ -1,7 +1,6 @@
 import datetime
 
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin
 
 from app import app
 
@@ -21,12 +20,13 @@ class RegisterCode(db.Model, TimeMixin):
 	enabled = db.Column(db.Boolean, default=False, nullable=False)
 
 
-class User(db.Model, UserMixin, TimeMixin):
+class User(db.Model, TimeMixin):
 	__tablename__ = "user"
 
 	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 	username = db.Column(db.String, nullable=False, unique=True)
 	password = db.Column(db.String, nullable=False)
+	mail = db.Column(db.String, nullable=False)
 	enabled = db.Column(db.Boolean, default=True, nullable=False)
 	last_login = db.Column(db.DateTime, default=datetime.datetime.now, onupdate=datetime.datetime.now)
 

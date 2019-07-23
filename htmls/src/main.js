@@ -8,9 +8,13 @@ import axios from 'axios';
 Vue.config.productionTip = false
 Vue.prototype.$axios = axios;
 
-Vue.use(ElementUI, {size: 'small'});
+const token = localStorage.getItem('token');
+if (token) {
+    Vue.prototype.$axios.defaults.headers.common['Authorization'] = token;
+}
+Vue.use(ElementUI, { size: 'small' });
 
 new Vue({
-  router,
-  render: h => h(App),
+    router,
+    render: h => h(App),
 }).$mount('#app')
