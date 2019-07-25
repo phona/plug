@@ -2,10 +2,11 @@ import datetime
 from uuid import uuid4
 
 from flask import jsonify, request
-from lib.flask_jwt import JWT, jwt_required, current_identity
 from werkzeug.security import safe_str_cmp
 
 from app import app
+from helps import ONE_HOUR_SECONDS, TimeSpan
+from lib.flask_jwt import JWT, current_identity, jwt_required
 from models import RegisterCode, User, db
 
 
@@ -16,7 +17,9 @@ def authenticate(username, password):
 
 
 def identity(payload):
-	user_id = payload['identity']
+	user_id = payload.get('identity', "")
+	if not user_id:
+		return None
 	return User.query.get(user_id)
 
 
@@ -47,6 +50,8 @@ HEROS = {
 class UserValidator:
 	def __init__(self, request):
 		request_body = request.get_json()
+		if request_body is None:
+			request_body = {}
 		self.username = request_body.get("username", "") if request_body else ""
 		self.password = request_body.get("password", "") if request_body else ""
 		self.mail = request_body.get("mail", "") if request_body else ""
@@ -58,14 +63,19 @@ class UserValidator:
 		return self.username and self.password and self.mail
 
 
-@app.route('/apis/users/<username>', methods=['GET'])
-@app.route('/apis/users', methods=['POST'])
+@app.route('/apis/users', methods=['GET'])
 @jwt_required()
-def user_view(username=None):
-	if request.method == "GET":
-		return jsonify({"code": 200, "desc": "OK"}), 200
+def user_view():
+	user = current_identity
+	if not user:
+		return jsonify({"code": 400, "desc": "Bad Request", "msg": "非法用户"}), 200
+
+	now = datetime.datetime.now()
+	if user.register_code.expired < now:
+		expired = 0
 	else:
-		return jsonify({"code": 200, "desc": "OK"}), 200
+		expired = (user.register_code.expired - now()).seconds // ONE_HOUR_SECONDS
+	return jsonify({"code": 200, "desc": "OK", "data": {"username": user.username, "expired": expired}}), 200
 
 
 @app.route('/apis/heros', methods=['GET'])
@@ -89,12 +99,77 @@ def register_view():
 	return jsonify({"code": 200, "desc": "OK"}), 200
 
 
+@app.route('/apis/actives', methods=['GET', 'POST'])
+@jwt_required()
+def activate_view():
+	if request.method == "GET":
+		if current_identity.register_code is None:
+			return jsonify({"code": 401, "desc": "Unauthorized", "msg": "用户未激活"}), 401
+		else:
+			return jsonify({"code": 200, "desc": "ok"}), 200
+
+	request_body = request.get_json()
+	if not request_body:
+		return jsonify({"code": 400, "desc": "Bad Request", "msg": "非法请求"})
+	code = request_body.get("code", "")
+	if not code:
+		return jsonify({"code": 400, "desc": "Bad Request", "msg": "激活码不能为空"}), 400
+
+	register_code = RegisterCode.query.filter_by(code=code).first()
+	if not register_code:
+		return jsonify({"code": 404, "desc": "Not Found", "msg": "无效的激活码"}), 404
+
+	current_identity.register_code = register_code
+	db.session.add(current_identity)
+	db.session.commit()
+	return jsonify({"code": 200, "desc": "OK", "msg": "激活成功"}), 200
+
+
+# manage apis
 @app.route('/apis/register_codes', methods=['POST'])
 def register_code_view():
-	code = RegisterCode(code=uuid4())
+	request_body = request.get_json()
+	if not request_body:
+		return jsonify({"code": 400, "desc": "Bad Request", "msg": "非法请求"}), 400
+
+	period = request_body.get("period", "")
+	if not period:
+		return jsonify({"code": 400, "desc": "Bad Request", "msg": "有效期不能为空"}), 400
+
+	expired = datetime.datetime.now() + TimeSpan(period)
+	if not expired:
+		return jsonify({"code": 400, "desc": "Bad Request", "msg": "非法的有效期"}), 400
+
+	code = RegisterCode(code=uuid4(), expired=expired)
 	db.session.add(code)
 	db.session.commit()
-	return jsonify({"code": 200, "desc": "OK"})
+	return jsonify({"code": 200, "desc": "OK", "data": {"code": code.code}})
+
+
+@app.route('/apis/user/<username>/charge', methods=['PUT'])
+def charge_view(username):
+	request_body = request.get_json()
+	if not request_body:
+		return jsonify({"code": 400, "desc": "Bad Request", "msg": "非法请求"}), 400
+
+	user = User.query.filter_by(username=username).first()
+	if not user:
+		return jsonify({"code": 404, "desc": "Not Found", "msg": "该用户不存在"})
+
+	period = request_body.get("period", "")
+	if not period:
+		return jsonify({"code": 400, "desc": "Bad Request", "msg": "有效期不能为空"})
+
+	now = datetime.datetime.now()
+	left_datetime = user.register_code.expired if user.register_code.expired > now else now
+	expired = left_datetime + TimeSpan(period)
+	if not expired:
+		return jsonify({"code": 400, "desc": "Bad Request", "msg": "非法的有效期"}), 400
+
+	register_code = user.register_code
+	register_code.expired = expired
+	db.session.commit()
+	return jsonify({"code": 200, "desc": "OK"}), 200
 
 
 @app.errorhandler(401)

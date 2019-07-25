@@ -17,7 +17,8 @@ class RegisterCode(db.Model, TimeMixin):
 
 	id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 	code = db.Column(db.String, nullable=False, unique=False)
-	enabled = db.Column(db.Boolean, default=False, nullable=False)
+	expired = db.Column(db.DateTime, nullable=False)
+	enabled = db.Column(db.Boolean, default=True, nullable=False)
 
 
 class User(db.Model, TimeMixin):

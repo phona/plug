@@ -63,16 +63,27 @@
                                 const token = resp.data.access_token;
                                 localStorage.setItem('token', token);
                                 this.$axios.defaults.headers.common['Authorization'] = token
-                                this.$alert("登录成功", "", {
-                                    confirmButtonText: '确定',
-                                    callback: action => {
-                                        this.$router.push("/main");
-                                    }
+                                return new Promise((resolve, reject) => {
+                                    this.$alert("登录成功", "", {
+                                        confirmButtonText: '确定',
+                                        callback: action => {
+                                            resolve();
+                                        }
+                                    });
                                 });
-                                return true;
+                            })
+                            .then(_ => {
+                                return this.$axios.get('/apis/actives');
+                            })
+                            .then(resp => {
+                                this.$router.push('/main');
                             })
                             .catch(error => {
-                                this.$message.error(error.response.data.msg);
+                                if (error.response.data.code === 401) {
+                                    this.$router.push('/active');
+                                } else {
+                                    this.$message.error(error.response.data.msg);
+                                }
                             });
 						return false;
 					} else {

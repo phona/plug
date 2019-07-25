@@ -21,6 +21,11 @@ export default new Router({
         },
 
         {
+            path: '/active',
+            component: resolve => require(['../components/Activate.vue'], resolve)
+        },
+
+        {
             path: '/main',
             component: resolve => require(['../components/Main.vue'], resolve)
         }

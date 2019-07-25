@@ -7,8 +7,8 @@
 						{{ k }}
 					</template>
 					<el-menu-item-group>
-						<el-menu-item :index="s" v-for="s in v">
-							{{ s }}
+						<el-menu-item :index="s.name" v-for="s in v" @click="currentHero = s">
+							{{ s.name }}
 						</el-menu-item>
 					</el-menu-item-group>
 				</el-submenu>
@@ -16,16 +16,13 @@
 		</el-aside>
 				
 		<el-container>
-			<el-header style="text-align: right; font-size: 12px">
-			<el-dropdown>
-				<i class="el-icon-setting" style="margin-right: 15px"></i>
-				<el-dropdown-menu slot="dropdown">
-				<el-dropdown-item>查看</el-dropdown-item>
-				<el-dropdown-item>新增</el-dropdown-item>
-				<el-dropdown-item>删除</el-dropdown-item>
-				</el-dropdown-menu>
-			</el-dropdown>
-			<span>王小虎</span>
+			<el-header style="font-size: 12px">
+				<div style="float: left">
+					当前英雄: <span style="font-size: 18px; font-weight: bold;">{{ currentHero.name }}</span>
+				</div>
+				<div style="text-align: right; ">
+					尊敬的<span>{{ username }}</span>欢迎您，您的剩余时长为{{ expired }}小时
+				</div>
 			</el-header>
 
 			<el-main>
@@ -38,24 +35,29 @@
 							<el-main>
 								<el-row>
 									<el-switch
-										v-model="value3"
+										v-model="currentHero.s1"
 										active-text="正常概率">
 									</el-switch>
 								</el-row>
 								<el-row>
 									<el-switch
-										v-model="value3"
+										v-model="currentHero.s2"
 										active-text="2倍概率">
 									</el-switch>
 								</el-row>
 								<el-row>
 									<el-switch
-										v-model="value3"
+										v-model="currentHero.s3"
 										active-text="2.5倍概率">
 									</el-switch>
 								</el-row>
 							</el-main>
 						</el-card>
+						<div 
+							v-if="currentHero.name === undefined"
+							class="el-loading-mask" 
+							style="width: 400px" 
+							@click="$message.info('请先选择英雄')"></div>
 					</el-col>
 
 					<el-col :span="8">
@@ -66,19 +68,19 @@
 							<el-main>
 								<el-row>
 									<el-switch
-										v-model="value3"
+										v-model="reliableAdjust.r1"
 										active-text="增加装备掉落率">
 									</el-switch>
 								</el-row>
 								<el-row>
 									<el-switch
-										v-model="value3"
+										v-model="reliableAdjust.r2"
 										active-text="提升已有棋子概率">
 									</el-switch>
 								</el-row>
 								<el-row>
 									<el-switch
-										v-model="value3"
+										v-model="reliableAdjust.r3"
 										active-text="提升癞子牌概率">
 									</el-switch>
 								</el-row>
@@ -94,21 +96,21 @@
 							<el-main>
 								<el-row>
 									<el-switch
-										v-model="value3"
+										v-model="testAdjust.t1"
 										active-text="增加挑打排名靠后(4-8)玩家概率">
 									</el-switch>
 								</el-row>
 								<el-row>
 									<el-switch
-										v-model="value3"
+										v-model="testAdjust.t2"
 										active-text="获得死亡玩家装备">
 									</el-switch>
 								</el-row>
 								<el-row>
 									<el-switch
-										v-model="value3"
+										v-model="testAdjust.t3"
 										disabled
-										active-text="放举报">
+										active-text="防举报">
 									</el-switch>
 								</el-row>
 							</el-main>
@@ -123,17 +125,35 @@
 </template>
 
 <script>
+	let heroAdjust = {
+		s1: false,
+		s2: false,
+		s3: false,
+	};
+
 	export default {
 		data() {
-			const item = {
-				date: '2016-05-02',
-				name: '王小虎',
-				address: '上海市普陀区金沙江路 1518 弄'
-			};
 			return {
-				tableData: Array(30).fill(item),
 				heros: {},
-				value3: false,
+				username: "",
+				expired: "",
+				currentHero: {
+					s1: false,
+					s2: false,
+					s3: false
+				},
+
+				reliableAdjust: {
+					r1: false,
+					r2: false,
+					r3: false
+				},
+
+				testAdjust: {
+					t1: false,
+					t2: false,
+					t3: false
+				}
 			}
 		},
 
@@ -141,7 +161,7 @@
 			this.loadData();
 			setInterval(() => {
 				this.loadData();
-			}, 10000);
+			}, 600000);
 		},
 
 		methods: {
@@ -149,15 +169,49 @@
 				this.$axios.get("/apis/heros")
 					.then(resp => {
 						this.heros = resp.data;
-						console.log(this.heros);
+						for (let h in this.heros) {
+							let heros = [];
+							this.heros[h].forEach(element => {
+								heros.push({
+									name: element,
+									adjust: Object.assign({}, heroAdjust),
+								});
+							});
+							this.heros[h] = heros;
+						}
 					})
 					.catch(error => {
+						console.log(error);
 						if (error.response.data.status_code === 401) {
 							this.$router.push("/login");
 						} else {
 							this.$message.error(error);
 						}
-					})
+					});
+				this.$axios.get("/apis/users")
+					.then(resp => {
+						this.username = resp.data.data.username;
+						this.expired = resp.data.data.expired;
+						if (this.expired < 3) {
+							this.$alert("您的剩余时长已不足3小时，请及时充值", `尊敬的${this.username}`, {
+								confirmButtonText: '确定',
+								callback: action => {}
+							});
+						}
+					})	
+					.catch(error => {
+						if (error.response.data !== undefined) {
+							this.$message.error(error.response.data.msg);
+						} else {
+							this.$message.error(error);
+						}
+					});
+			},
+
+			handleUnSelectHero() {
+				if (this.currentHero.name === undefined) {
+
+				}
 			}
 		}
 

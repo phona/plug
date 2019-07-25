@@ -1,16 +1,18 @@
-FROM python:3.6-slim
+FROM alpine:3.7
 
-COPY requirements.txt /
+EXPOSE 3031
+WORKDIR /usr/src/app
 
-RUN pip install -r /requirements.txt
+RUN apk add --no-cache \
+        uwsgi-python3 \
+        python3
 
-COPY . /app
+COPY . .
 
-WORKDIR /app
+RUN pip3 install --no-cache-dir -r requirements.txt
 
-EXPOSE 80
-
-ENV NAME Upgrade
-
-# CMD ["wsgi", "--ini", "/app/upgrade.ini"]
-CMD ["python", "web.py"]
+CMD [ "uwsgi", "--socket", "0.0.0.0:3031", \
+               "--uid", "uwsgi", \
+               "--plugins", "python3", \
+               "--protocol", "uwsgi", \
+               "--wsgi", "web:app" ]
