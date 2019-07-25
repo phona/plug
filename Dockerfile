@@ -5,7 +5,12 @@ WORKDIR /usr/src/app
 
 RUN apk add --no-cache \
         uwsgi-python3 \
-        python3
+        python3 \
+		postgresql-dev \
+		gcc \
+		python3-dev \
+		musl-dev \
+		linux-headers
 
 COPY . .
 
