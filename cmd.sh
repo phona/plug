@@ -1,6 +1,6 @@
 #! /usr/bash
 
-PYTHON=python
+PYTHON=python3
 
 case "$1" in
 	init)
