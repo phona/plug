@@ -26,7 +26,6 @@ def identity(payload):
 app.config["JWT_AUTH_URL_RULE"] = "/apis/login"
 app.config["JWT_AUTH_HEADER_PREFIX"] = "Authorization"
 app.config["JWT_EXPIRATION_DELTA"] = datetime.timedelta(hours=2)
-jwt = JWT(app, authenticate, identity)
 
 HEROS = {
 	"恶魔游侠": ["薇恩", "维鲁斯", "蜘蛛", "艾希", "剑魔", "纳尔", "千珏", "乌鸦"],
@@ -104,7 +103,7 @@ def register_view():
 def activate_view():
 	if request.method == "GET":
 		if current_identity.register_code is None:
-			return jsonify({"code": 401, "desc": "Unauthorized", "msg": "用户未激活"}), 401
+			return jsonify({"code": 403, "desc": "Unauthorized", "msg": "用户未激活"}), 403
 		else:
 			return jsonify({"code": 200, "desc": "ok"}), 200
 
@@ -174,13 +173,16 @@ def charge_view(username):
 
 @app.errorhandler(401)
 def login_required_handler(err):
-	return jsonify({"code": 401, "desc": "Unauthorized", "msg": "未登录"})
+	return jsonify({"code": 401, "desc": "Unauthorized", "msg": "用户未登录"}), 401
 
 
 @app.errorhandler(500)
 def server_error_handler(err):
-	return jsonify({"code": 500, "desc": "Internal Server Error", "msg": str(err)})
+	return jsonify({"code": 500, "desc": "Internal Server Error", "msg": str(err)}), 500
 
+
+jwt = JWT(app, authenticate, identity)
+jwt.jwt_error_callback = login_required_handler
 
 if __name__ == "__main__":
 	app.run()

@@ -79,10 +79,14 @@
                                 this.$router.push('/main');
                             })
                             .catch(error => {
-                                if (error.response.data.code === 401) {
+                                if (error.response.data.code === 403) {
                                     this.$router.push('/active');
-                                } else {
+                                } else if (error.response.data.code === 401) {
+                                    this.$message.error("用户名或密码错误");
+                                } else if (error.response.data.msg !== undefined) {
                                     this.$message.error(error.response.data.msg);
+                                } else {
+                                    this.$message.error("未知错误，请联系管理员处理");
                                 }
                             });
 						return false;
