@@ -1,4 +1,4 @@
-all: node_modules dist
+all: node_modules/ dist/
 
 node_modules/: package.json
 	@echo "Installing..."

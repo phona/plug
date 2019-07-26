@@ -12,9 +12,11 @@ RUN apk add --no-cache \
 		musl-dev \
 		linux-headers
 
-COPY . .
 
-RUN pip3 install --no-cache-dir -r requirements.txt
+COPY requirements.txt /
+RUN pip3 install -r /requirements.txt
+
+COPY . .
 
 CMD [ "uwsgi", "--socket", "0.0.0.0:3031", \
                "--uid", "uwsgi", \

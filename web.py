@@ -73,7 +73,7 @@ def user_view():
 	if user.register_code.expired < now:
 		expired = 0
 	else:
-		expired = (user.register_code.expired - now()).seconds // ONE_HOUR_SECONDS
+		expired = (user.register_code.expired - now).seconds // ONE_HOUR_SECONDS
 	return jsonify({"code": 200, "desc": "OK", "data": {"username": user.username, "expired": expired}}), 200
 
 
