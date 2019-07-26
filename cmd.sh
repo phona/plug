@@ -8,6 +8,7 @@ case "$1" in
 from models import db
 db.create_all()
 END
+	;;
 	*)
 		echo "unknown command"
 	esac
