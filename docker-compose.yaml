@@ -19,7 +19,8 @@ services:
     image: nginx:latest
     volumes:
       - ./data/nginx/conf.d:/etc/nginx/conf.d
-      - ./logs/nginx:/var/log/nginx
+      - ./data/logs/nginx:/var/log/nginx
+      - ./htmls/dist:/var/html
     depends_on:
       - plug-app
     ports:

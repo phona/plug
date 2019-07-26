@@ -1,6 +1,6 @@
 from flask import Flask
 
-from config import DevelopmentConfig
+import config
 
 app = Flask(__name__)
-app.config.from_object(DevelopmentConfig)
+app.config.from_object(config.ProductionConfig)
