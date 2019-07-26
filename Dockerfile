@@ -16,8 +16,6 @@ COPY . .
 
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-RUN sh cmd.sh init
-
 CMD [ "uwsgi", "--socket", "0.0.0.0:3031", \
                "--uid", "uwsgi", \
                "--plugins", "python3", \

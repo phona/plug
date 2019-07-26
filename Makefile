@@ -1,6 +1,7 @@
 build: app-image
-	cd htmls && make
+	@cd htmls && make
 
-app-image: Dockfile $(shell find . -name "*.py")
+app-image: Dockerfile $(shell find . -name "*.py")
+	@echo "Buiding image for app..."
 	@docker build --tag=plug-app .
 	@date > app-image
