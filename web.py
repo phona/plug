@@ -179,7 +179,7 @@ def login_required_handler(err):
 
 @app.errorhandler(500)
 def server_error_handler(err):
-	return jsonify({"code": 500, "desc": "Internal Server Error", "msg": err})
+	return jsonify({"code": 500, "desc": "Internal Server Error", "msg": str(err)})
 
 
 if __name__ == "__main__":

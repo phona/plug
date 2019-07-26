@@ -1,6 +1,6 @@
 #! /usr/bash
 
-PYTHON=python
+PYTHON=venv/bin/python
 
 case "$1" in
 	init)
@@ -8,6 +8,10 @@ case "$1" in
 from models import db
 db.create_all()
 END
+		;;
+	dev)
+		$PYTHON web.py
+		;;
 	*)
 		echo "unknown command"
 	esac

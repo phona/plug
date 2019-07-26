@@ -1,3 +1,8 @@
+run: build
+	@echo "Run docker..."
+	@docker-compose up -d
+	@docker-compose exec plug-app sh cmd.sh init
+
 build: app-image
 	@cd htmls && make
 
