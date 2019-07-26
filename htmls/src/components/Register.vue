@@ -124,11 +124,7 @@
                                 this.$alert("注册成功", "", {
                                     confirmButtonText: '确定',
                                     callback: action => {
-										this.$axios.get('/apis/users/1232').then(response => {
-											console.log(response.data);
-										}).catch(error => {
-											console.log(response.data);
-										})
+                                        this.$router.push('/login');
                                     }
                                 });
                                 return true;

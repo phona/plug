@@ -16,3 +16,4 @@ class DevelopmentConfig(BaseConfig):
 
 class ProductionConfig(BaseConfig):
 	DEBUG = False
+	SQLALCHEMY_DATABASE_URI: str = "postgres://postgres:postgres@postgresql:5432/plug"

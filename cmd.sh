@@ -12,6 +12,9 @@ END
 	dev)
 		$PYTHON web.py
 		;;
+	build)
+		docker build --tag=plug-app .
+		;;
 	*)
 		echo "unknown command"
 	esac
