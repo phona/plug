@@ -1,6 +1,7 @@
 {
-  "name": "htmls",
-  "version": "0.1.0",
+  "name": "LOLHikaru",
+  "version": "9.14.0",
+  "author": "hikaru",
   "private": true,
   "main": "app.js",
   "scripts": {
@@ -38,8 +39,8 @@
     "electron-builder": "latest"
   },
   "build": {
-    "appId": "1.0",
-    "productName": "云顶之弈棋魂1.0",
+    "appId": "v1",
+    "productName": "云顶之弈棋魂",
     "dmg": {},
     "win": {
       "target": "portable",

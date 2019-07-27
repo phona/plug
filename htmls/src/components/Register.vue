@@ -1,6 +1,6 @@
 <template>
     <div class="login-wrap">
-        <div class="ms-title">欢迎使用云顶之弈棋魂1.0</div>
+        <div class="ms-title">欢迎使用云顶之弈棋魂</div>
         <div class="ms-login">
             <el-row :gutter="10" style="margin-bottom: 10px">
                 <el-col :offset="18">
