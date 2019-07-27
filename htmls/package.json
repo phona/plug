@@ -8,15 +8,14 @@
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "launch": "NODE_ENV=PROD electron app.js",
-    "pack": "electron-packager .",
-    "pack-win": "electron-packager . --overwrite --platform=win32 --arch=x64"
+    "launch-dev": "NODE_ENV=DEV electron app.js",
+    "pack": "electron-builder .",
+    "pack-win": "electron-builder --win"
   },
   "dependencies": {
     "core-js": "^2.6.5",
-    "electron": "^5.0.7",
     "vue": "^2.6.10",
-    "vue-router": "^3.0.7",
-    "vuex": "^3.1.1"
+    "vue-router": "^3.0.7"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.9.0",
@@ -24,6 +23,7 @@
     "@vue/cli-service": "^3.9.0",
     "axios": "^0.19.0",
     "electron-packager": "^14.0.3",
+    "electron": "^5.0.7",
     "element-ui": "^2.10.1",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
@@ -34,7 +34,17 @@
     "webpack-bundle-analyzer": "^3.3.2",
     "webpack-cli": "^3.3.6",
     "webpack-dev-server": "^3.7.2",
-    "webpack-merge": "^4.2.1"
+    "webpack-merge": "^4.2.1",
+    "electron-builder": "latest"
+  },
+  "build": {
+    "appId": "1.0",
+    "productName": "云顶之弈棋魂1.0",
+    "dmg": {},
+    "win": {
+      "target": "portable",
+      "icon": "public/panda.ico"
+    }
   },
   "eslintConfig": {
     "root": true,
