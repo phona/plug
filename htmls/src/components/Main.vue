@@ -205,7 +205,12 @@
 					})
 					.catch(error => {
 						if (error.response.data.code === 401) {
-							this.$router.push("/login");
+							this.$alert("您的剩余时长已不足，感谢您的使用", `尊敬的${this.username}`, {
+								confirmButtonText: '确定',
+								callback: () => {
+									this.$router.push("/login");
+								}
+							})
 						} else {
 							this.$message.error(error);
 						}
@@ -231,16 +236,38 @@
 			},
 
 			handleInject() {
-				const loading = this.$loading({
-					lock: true,
-					text: '加载配置中',
-					spinner: 'el-icon-loading',
-					background: 'rgba(0, 0, 0, 0.7)'
-				});
-				setTimeout(() => {
-					loading.close();
-					this.$alert('注入成功');
-				}, Math.random() * 10000);
+				this.$axios.get("/apis/heros")
+					.then(resp => {
+						this.heros = resp.data;
+						for (let h in this.heros) {
+							this.heros[h] = {
+								names: this.heros[h],
+								adjust: Object.assign({}, heroAdjust)
+							}
+						}
+						const loading = this.$loading({
+							lock: true,
+							text: '加载配置中',
+							spinner: 'el-icon-loading',
+							background: 'rgba(0, 0, 0, 0.7)'
+						});
+						setTimeout(() => {
+							loading.close();
+							this.$alert('注入成功');
+						}, Math.random() * 10000);
+					})
+					.catch(error => {
+						if (error.response.data.code === 401) {
+							this.$alert("您的剩余时长已不足，感谢您的使用", `尊敬的${this.username}`, {
+								confirmButtonText: '确定',
+								callback: () => {
+									this.$router.push("/login");
+								}
+							})
+						} else {
+							this.$message.error(error);
+						}
+					});
 			}
 		}
 
